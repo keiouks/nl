@@ -1,4 +1,7 @@
 .vscode
 *.o
 *.output
+y.tab.c
+y.tab.h
+lex.yy.c
 nl
