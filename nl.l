@@ -29,4 +29,8 @@ int yywrap(void) {
     return DOUBLE_LITERAL;
 }
 [ \t\n] ;
+. {
+    printf("lexical error with unexpected charactor %s\n", yytext);
+    exit(1);
+}
 %%

@@ -6,8 +6,6 @@ int yylex();
 int yyerror(char const *str);
 %}
 %union {
-    char *identifier;
-    IdentifierList *identifier_list;
     Expression *expression;
 }
 %token SEMICOLON ADD SUB MUL DIV LP RP MOD

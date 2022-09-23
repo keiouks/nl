@@ -35,15 +35,8 @@ eval_expression(Expression *exp) {
         case SUB_EXPRESSION:
         case MUL_EXPRESSION:
         case DIV_EXPRESSION:
-        case MOD_EXPRESSION: {
-            v = nl_eval_binary_expression(exp->type, exp->u.binary_expression.left, exp->u.binary_expression.right);
-            break;
-        }
-        case MINUS_EXPRESSION: {
-            v = nl_eval_minus_expression(exp->u.minus_expression);
-            break;
-        }
-        case EXPRESSION_TYPE_COUNT_PLUS_1:
+        case MOD_EXPRESSION:
+        case EXPRESSION_TYPE_PLUS:
         default: {
             printf("[runtime error] eval expression with unexpected type:%d\n", exp->type);
             exit(1);
@@ -78,9 +71,8 @@ eval_binary_int(ExpressionType operator, int left, int right, NL_Value *result) 
             break;
         }
         case INT_EXPRESSION:
-        case DOUBLE_EXPRESSION: 
-        case MINUS_EXPRESSION:
-        case EXPRESSION_TYPE_COUNT_PLUS_1:
+        case DOUBLE_EXPRESSION:
+        case EXPRESSION_TYPE_PLUS:
         default: {
             printf("[runtime error] eval binary int with unexpected type:%d\n", operator);
             exit(1);
@@ -114,9 +106,8 @@ eval_binary_double(ExpressionType operator, double left, double right, NL_Value 
             break;
         }
         case INT_EXPRESSION:
-        case DOUBLE_EXPRESSION: 
-        case MINUS_EXPRESSION:
-        case EXPRESSION_TYPE_COUNT_PLUS_1:
+        case DOUBLE_EXPRESSION:
+        case EXPRESSION_TYPE_PLUS:
         default: {
             printf("[runtime error] eval binary int with unexpected type:%d\n", operator);
             exit(1);
@@ -162,22 +153,4 @@ nl_print_value(NL_Value *v) {
     } else if (v->type == DOUBLE_VAULE) {
         printf("--> %lf\n", v->u.double_value);
     }
-}
-
-NL_Value
-nl_eval_minus_expression(Expression *operand) {
-    NL_Value operand_val;
-    NL_Value result;
-    operand_val = eval_expression(operand);
-    if (operand_val.type == INT_VALUE) {
-        result.type = INT_VALUE;
-        result.u.int_value = -operand_val.u.int_value;
-    } else if(operand_val.type == DOUBLE_VAULE) {
-        result.type = DOUBLE_VAULE;
-        result.u.double_value = -operand_val.u.double_value;
-    } else {
-        printf("[runtime error] eval minus expression with unexpected type:%d\n", operand_val.type);
-        exit(1);
-    }
-    return result;
 }

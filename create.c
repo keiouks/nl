@@ -3,40 +3,6 @@
 #include <string.h>
 #include "nl.h"
 
-IdentifierList *
-nl_create_identifier(char *identifier) {
-    IdentifierList *i_node;
-    int len = strlen(identifier);
-    char *name = malloc(len + 1);
-    strcpy(name, identifier);
-    name[len] = '\0';
-    i_node = malloc(sizeof(IdentifierList));
-
-    i_node->name = name;
-    i_node->next = NULL;
-
-    return i_node;
-}
-
-IdentifierList *
-nl_chain_identifier(IdentifierList *list, char *identifier) {
-    IdentifierList *pos;
-    for (pos = list; pos && pos->next; pos = pos->next)
-        ;
-        
-    pos->next = nl_create_identifier(identifier);
-    return list;
-}
-
-void
-nl_print_identifier_list(IdentifierList *list) {
-    IdentifierList *pos;
-    for (pos = list; pos; pos = pos->next) {
-        printf("-->%s", pos->name);
-    }
-    printf(";\n");
-}
-
 Expression *
 nl_alloc_expression(ExpressionType type) {
     Expression *exp;
@@ -64,34 +30,20 @@ convert_value_to_expression(NL_Value *v) {
 }
 
 Expression *
-nl_create_minus_expression(Expression *operand) {
-    if (operand->type == INT_EXPRESSION || operand->type == DOUBLE_EXPRESSION) {
-        NL_Value v;
-        v = nl_eval_minus_expression(operand);
-        *operand = convert_value_to_expression(&v);
-        return operand;
-    } else {
-        Expression *exp;
-        exp = nl_alloc_expression(MINUS_EXPRESSION);
-        exp->u.minus_expression = operand;
-        return exp;
-    }
+nl_create_binary_expression(ExpressionType type, Expression *left, Expression *right) {
+    NL_Value v;
+    v = nl_eval_binary_expression(type, left, right);
+
+    *left = convert_value_to_expression(&v);
+    return left;
 }
 
 Expression *
-nl_create_binary_expression(ExpressionType type, Expression *left, Expression *right) {
-    if ((left->type == INT_EXPRESSION || left->type == DOUBLE_EXPRESSION)
-        && (right->type == INT_EXPRESSION || right->type == DOUBLE_EXPRESSION)) {
-        NL_Value v;
-        v = nl_eval_binary_expression(type, left, right);
-
-        *left = convert_value_to_expression(&v);
-        return left;
-    } else {
-        Expression *exp;
-        exp = nl_alloc_expression(type);
-        exp->u.binary_expression.left = left;
-        exp->u.binary_expression.right = right;
-        return exp;
+nl_create_minus_expression(Expression *exp) {
+    if (exp->type == INT_EXPRESSION) {
+        exp->u.int_value = -exp->u.int_value;
+    } else if (exp->type == DOUBLE_EXPRESSION) {
+        exp->u.double_value = -exp->u.double_value;
     }
+    return exp;
 }
