@@ -8,7 +8,6 @@ int yywrap(void) {
 }
 %}
 %%
-";" return SEMICOLON;
 "+" return ADD;
 "-" return SUB;
 "*" return MUL;
@@ -16,6 +15,7 @@ int yywrap(void) {
 "%" return MOD;
 "(" return LP;
 ")" return RP;
+"\n" return CR;
 ([1-9][0-9]*)|"0" {
     Expression *expression = nl_alloc_expression(INT_EXPRESSION);
     sscanf(yytext, "%d", &expression->u.int_value);
@@ -28,7 +28,7 @@ int yywrap(void) {
     yylval.expression = expression;
     return DOUBLE_LITERAL;
 }
-[ \t\n] ;
+[ \t] ;
 . {
     printf("lexical error with unexpected charactor %s\n", yytext);
     exit(1);

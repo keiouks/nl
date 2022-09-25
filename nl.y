@@ -8,23 +8,21 @@ int yyerror(char const *str);
 %union {
     Expression *expression;
 }
-%token SEMICOLON ADD SUB MUL DIV LP RP MOD
+%token ADD SUB MUL DIV LP RP MOD CR
 %token <expression> INT_LITERAL DOUBLE_LITERAL
 %type <expression> primary_expression mult_expression add_expression expression
 %%
-statement_list
-    : statement
-    | statement_list statement
+expression_list
+    : expression
+    | expression_list expression
     ;
-statement
-    : expression SEMICOLON
+expression
+    : add_expression CR
     {
         NL_Value v = nl_eval_expression($1);
         nl_print_value(&v);
     }
-    ;
-expression
-    : add_expression
+    | add_expression
     ;
 add_expression
     : mult_expression
