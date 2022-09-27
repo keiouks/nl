@@ -7,8 +7,10 @@ int yyerror(char const *str);
 %}
 %union {
     Expression *expression;
+    char *identifier;
 }
-%token SEMICOLON ADD SUB MUL DIV LP RP MOD
+%token SEMICOLON ADD SUB MUL DIV LP RP MOD ASSIGN
+%token <identifier> IDENTIFIER
 %token <expression> INT_LITERAL DOUBLE_LITERAL
 %type <expression> primary_expression mult_expression add_expression expression
 %%
@@ -21,6 +23,11 @@ statement
     {
         NL_Value v = nl_eval_expression($1);
         nl_print_value(&v);
+    }
+    | IDENTIFIER ASSIGN expression SEMICOLON
+    {
+        King *king = nl_get_current_king();
+        nl_execute_assign_statement(king, $1, $3);
     }
     ;
 expression
@@ -60,6 +67,10 @@ primary_expression
     | LP expression RP
     {
         $$ = $2;
+    }
+    | IDENTIFIER
+    {
+        $$ = nl_create_variable_expression($1);
     }
     | INT_LITERAL
     | DOUBLE_LITERAL

@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "_NL.h"
 
 int main(int argc, char **argv) {
-    extern int yyparse(void);
-    extern FILE *yyin;
+    King *king;
     FILE *fp;
 
     if (argc != 2) {
@@ -17,9 +17,9 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    yyin = fp;
-    if (yyparse()) {
-        fprintf(stderr, "Error ! \n");
-        exit(1);
-    }
+    king = NL_create_king();
+
+    NL_compile(king, fp);
+
+    return 0;
 }

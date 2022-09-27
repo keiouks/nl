@@ -5,6 +5,8 @@ OBJS = \
 	y.tab.o\
 	create.o\
 	eval.o\
+	execute.o\
+	interface.o\
 	main.o
 CFLAGS = -c -g -Wall -Wswitch-enum -ansi -pedantic -DDEBUG
 INCLUDES = \
@@ -24,6 +26,7 @@ y.tab.o : y.tab.c nl.h
 lex.yy.o : lex.yy.c nl.h
 	$(CC) -c -g $*.c $(INCLUDES)
 
-create.o: create.c nl.h
-eval.o: eval.c nl.h
-main.o: main.c 
+create.o: create.c nl.h _NL.h
+eval.o: eval.c nl.h _NL.h
+execute.o: execute.c nl.h _NL.h
+main.o: main.c _NL.h

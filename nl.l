@@ -16,6 +16,11 @@ int yywrap(void) {
 "%" return MOD;
 "(" return LP;
 ")" return RP;
+"=" return ASSIGN;
+[A-Za-z_][A-Za-z_0-9]* {
+    yylval.identifier = nl_create_identifier(yytext);
+    return IDENTIFIER;
+}
 ([1-9][0-9]*)|"0" {
     Expression *expression = nl_alloc_expression(INT_EXPRESSION);
     sscanf(yytext, "%d", &expression->u.int_value);

@@ -146,6 +146,17 @@ nl_eval_expression(Expression *exp) {
     return eval_expression(exp);
 }
 
+NL_Value
+nl_eval_variable(King *king, char *identifier) {
+    Variable *var = nl_search_global_variable(king, identifier);
+    if (var != NULL) {
+        return var->value;
+    } else {
+        printf("[runtime error] This variable[%s] has not been declared.\n", identifier);
+        exit(1);
+    }
+}
+
 void
 nl_print_value(NL_Value *v) {
     if (v->type == INT_VALUE) {
@@ -154,3 +165,5 @@ nl_print_value(NL_Value *v) {
         printf("--> %lf\n", v->u.double_value);
     }
 }
+
+
