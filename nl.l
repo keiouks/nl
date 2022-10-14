@@ -8,6 +8,7 @@ int yywrap(void) {
 }
 %}
 %%
+"print" return PRINT;
 ";" return SEMICOLON;
 "+" return ADD;
 "-" return SUB;

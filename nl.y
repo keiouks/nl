@@ -9,7 +9,7 @@ int yyerror(char const *str);
     Expression *expression;
     char *identifier;
 }
-%token SEMICOLON ADD SUB MUL DIV LP RP MOD ASSIGN
+%token SEMICOLON ADD SUB MUL DIV LP RP MOD ASSIGN PRINT
 %token <identifier> IDENTIFIER
 %token <expression> INT_LITERAL DOUBLE_LITERAL
 %type <expression> primary_expression mult_expression add_expression expression
@@ -21,13 +21,17 @@ statement_list
 statement
     : expression SEMICOLON
     {
-        NL_Value v = nl_eval_expression($1);
-        nl_print_value(&v);
+        nl_eval_expression($1);
     }
     | IDENTIFIER ASSIGN expression SEMICOLON
     {
         King *king = nl_get_current_king();
         nl_execute_assign_statement(king, $1, $3);
+    }
+    | PRINT LP expression RP SEMICOLON
+    {
+        NL_Value v = nl_eval_expression($3);
+        nl_print_value(&v);
     }
     ;
 expression
