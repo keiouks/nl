@@ -20,6 +20,34 @@ eval_double_expression(double value) {
 }
 
 static NL_Value
+eval_variable_expression(Expression *exp) {
+    King *king = nl_get_current_king();
+    Variable *var = nl_search_global_variable(king, exp->u.identifier);
+    if (var != NULL) {
+        return var->value;
+    } else {
+        printf("[runtime error] This variable[%s] has not been declared.\n", exp->u.identifier);
+        exit(1);
+    }
+}
+
+static NL_Value eval_expression(Expression *exp);
+
+static NL_Value
+eval_minus_expression(Expression *exp) {
+    NL_Value result = eval_expression(exp->u.minus_expression);
+    if (result.type == INT_VALUE) {
+        result.u.int_value = -result.u.int_value;
+    } else if (result.type == DOUBLE_VAULE) {
+        result.u.double_value = -result.u.double_value;
+    } else {
+        printf("[runtime error] eval minus expression with unexpected value type: %d.\n", result.type);
+        exit(1);
+    }
+    return result;
+}
+
+static NL_Value
 eval_expression(Expression *exp) {
     NL_Value v;
     switch (exp->type) {
@@ -31,11 +59,22 @@ eval_expression(Expression *exp) {
             v = eval_double_expression(exp->u.double_value);
             break;
         }
+        case VARIABLE_EXPRESSION: {
+            v = eval_variable_expression(exp);
+            break;
+        }
+        case MINUS_EXPRESSION: {
+            v = eval_minus_expression(exp);
+            break;
+        }
         case ADD_EXPRESSION:
         case SUB_EXPRESSION:
         case MUL_EXPRESSION:
         case DIV_EXPRESSION:
-        case MOD_EXPRESSION:
+        case MOD_EXPRESSION: {
+            v = nl_eval_binary_expression(exp->type, exp->u.binary_expression.left, exp->u.binary_expression.right);
+            break;
+        }
         case EXPRESSION_TYPE_PLUS:
         default: {
             printf("[runtime error] eval expression with unexpected type:%d\n", exp->type);
@@ -72,6 +111,8 @@ eval_binary_int(ExpressionType operator, int left, int right, NL_Value *result) 
         }
         case INT_EXPRESSION:
         case DOUBLE_EXPRESSION:
+        case VARIABLE_EXPRESSION:
+        case MINUS_EXPRESSION:
         case EXPRESSION_TYPE_PLUS:
         default: {
             printf("[runtime error] eval binary int with unexpected type:%d\n", operator);
@@ -107,6 +148,8 @@ eval_binary_double(ExpressionType operator, double left, double right, NL_Value 
         }
         case INT_EXPRESSION:
         case DOUBLE_EXPRESSION:
+        case VARIABLE_EXPRESSION:
+        case MINUS_EXPRESSION:
         case EXPRESSION_TYPE_PLUS:
         default: {
             printf("[runtime error] eval binary int with unexpected type:%d\n", operator);
@@ -144,17 +187,6 @@ nl_eval_binary_expression(ExpressionType operator, Expression *left, Expression 
 NL_Value
 nl_eval_expression(Expression *exp) {
     return eval_expression(exp);
-}
-
-NL_Value
-nl_eval_variable(King *king, char *identifier) {
-    Variable *var = nl_search_global_variable(king, identifier);
-    if (var != NULL) {
-        return var->value;
-    } else {
-        printf("[runtime error] This variable[%s] has not been declared.\n", identifier);
-        exit(1);
-    }
 }
 
 void

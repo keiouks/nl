@@ -8,30 +8,51 @@ int yyerror(char const *str);
 %union {
     Expression *expression;
     char *identifier;
+    Statement *statement;
+    StatementList *statement_list;
 }
 %token SEMICOLON ADD SUB MUL DIV LP RP MOD ASSIGN PRINT
 %token <identifier> IDENTIFIER
 %token <expression> INT_LITERAL DOUBLE_LITERAL
 %type <expression> primary_expression mult_expression add_expression expression
+%type <statement> statement expression_statement assign_statement print_statement
+%type <statement_list> statement_list
 %%
 statement_list
     : statement
-    | statement_list statement
-    ;
-statement
-    : expression SEMICOLON
-    {
-        nl_eval_expression($1);
-    }
-    | IDENTIFIER ASSIGN expression SEMICOLON
     {
         King *king = nl_get_current_king();
-        nl_execute_assign_statement(king, $1, $3);
+        king->statement_list = nl_add_to_statement_list(king->statement_list, $1);
+        $$ = king->statement_list;
     }
-    | PRINT LP expression RP SEMICOLON
+    | statement_list statement
     {
-        NL_Value v = nl_eval_expression($3);
-        nl_print_value(&v);
+        King *king = nl_get_current_king();
+        king->statement_list = nl_add_to_statement_list($1, $2);
+        $$ = king->statement_list;
+    }
+    ;
+statement
+    : expression_statement
+    | assign_statement
+    | print_statement
+    ;
+expression_statement
+    : expression SEMICOLON
+    {
+        $$ = nl_create_expression_statement($1);
+    }
+    ;
+assign_statement
+    : IDENTIFIER ASSIGN expression SEMICOLON
+    {
+        $$ = nl_create_assign_statement($1, $3);
+    }
+    ;
+print_statement
+    : PRINT LP expression RP SEMICOLON
+    {
+        $$ = nl_create_print_statement($3);
     }
     ;
 expression

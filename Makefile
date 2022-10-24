@@ -29,4 +29,5 @@ lex.yy.o : lex.yy.c nl.h
 create.o: create.c nl.h _NL.h
 eval.o: eval.c nl.h _NL.h
 execute.o: execute.c nl.h _NL.h
+interface.o: interface.c nl.h _NL.h
 main.o: main.c _NL.h

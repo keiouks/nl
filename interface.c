@@ -19,8 +19,8 @@ King *
 NL_create_king(void) {
     King *king = malloc(sizeof(struct King_tag));
     king->variable = NULL;
+    king->statement_list = NULL;
 
-    nl_set_current_king(king);
     return king;
 }
 
@@ -29,6 +29,8 @@ NL_compile(King *king, FILE *fp) {
     extern int yyparse(void);
     extern FILE *yyin;
 
+    nl_set_current_king(king);
+    
     yyin = fp;
     if (yyparse()) {
         fprintf(stderr, "Error ! \n");
@@ -55,4 +57,9 @@ nl_add_global_variable(King *king, char *identifier, NL_Value *value) {
     new_var->next = king->variable;
     king->variable = new_var;
     new_var->value = *value;
+}
+
+void
+NL_run(King *king) {
+    nl_execute_statement_list(king->statement_list);
 }

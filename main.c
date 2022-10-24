@@ -20,6 +20,7 @@ int main(int argc, char **argv) {
     king = NL_create_king();
 
     NL_compile(king, fp);
+    NL_run(king);
 
     return 0;
 }
