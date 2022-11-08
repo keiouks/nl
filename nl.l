@@ -9,6 +9,8 @@ int yywrap(void) {
 %}
 %%
 "print" return PRINT;
+"function" return FUNCTION;
+"return" return RETURN;
 ";" return SEMICOLON;
 "+" return ADD;
 "-" return SUB;
@@ -17,6 +19,8 @@ int yywrap(void) {
 "%" return MOD;
 "(" return LP;
 ")" return RP;
+"{" return LC;
+"}" return RC;
 "=" return ASSIGN;
 [A-Za-z_][A-Za-z_0-9]* {
     yylval.identifier = nl_create_identifier(yytext);

@@ -20,6 +20,7 @@ NL_create_king(void) {
     King *king = malloc(sizeof(struct King_tag));
     king->variable = NULL;
     king->statement_list = NULL;
+    king->function_list = NULL;
 
     return king;
 }
@@ -57,6 +58,18 @@ nl_add_global_variable(King *king, char *identifier, NL_Value *value) {
     new_var->next = king->variable;
     king->variable = new_var;
     new_var->value = *value;
+}
+
+FunctionDefinition *
+nl_search_function(char *name) {
+    FunctionDefinition *pos;
+    King *king = nl_get_current_king();
+    for (pos = king->function_list; pos; pos = pos->next) {
+        if (!strcmp(pos->name, name)) {
+            break;
+        }
+    }
+    return pos;
 }
 
 void

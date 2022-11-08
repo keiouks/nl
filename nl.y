@@ -10,32 +10,40 @@ int yyerror(char const *str);
     char *identifier;
     Statement *statement;
     StatementList *statement_list;
+    Block *block;
 }
-%token SEMICOLON ADD SUB MUL DIV LP RP MOD ASSIGN PRINT
+%token SEMICOLON ADD SUB MUL DIV LP RP MOD ASSIGN PRINT FUNCTION LC RC RETURN
 %token <identifier> IDENTIFIER
 %token <expression> INT_LITERAL DOUBLE_LITERAL
 %type <expression> primary_expression mult_expression add_expression expression
-%type <statement> statement expression_statement assign_statement print_statement
+%type <statement> statement expression_statement assign_statement print_statement function_definition_statement return_statement
 %type <statement_list> statement_list
+%type <block> block
 %%
+page
+    :
+    | statement_list
+    {
+        King *king = nl_get_current_king();
+        king->statement_list = $1;
+    }
+    ;
 statement_list
     : statement
     {
-        King *king = nl_get_current_king();
-        king->statement_list = nl_add_to_statement_list(king->statement_list, $1);
-        $$ = king->statement_list;
+        $$ = nl_create_statement_list($1);
     }
     | statement_list statement
     {
-        King *king = nl_get_current_king();
-        king->statement_list = nl_add_to_statement_list($1, $2);
-        $$ = king->statement_list;
+        $$ = nl_add_to_statement_list($1, $2);
     }
     ;
 statement
     : expression_statement
     | assign_statement
     | print_statement
+    | function_definition_statement
+    | return_statement
     ;
 expression_statement
     : expression SEMICOLON
@@ -53,6 +61,22 @@ print_statement
     : PRINT LP expression RP SEMICOLON
     {
         $$ = nl_create_print_statement($3);
+    }
+    ;
+function_definition_statement
+    : FUNCTION IDENTIFIER LP RP block 
+    {
+        $$ = nl_create_function_definition_statement($2, $5);
+    }
+    ;
+return_statement
+    : RETURN expression SEMICOLON
+    {
+        $$ = nl_create_return_statement($2);
+    }
+    | RETURN SEMICOLON
+    {
+        $$ = nl_create_return_statement(NULL);
     }
     ;
 expression
@@ -89,6 +113,10 @@ primary_expression
     {
         $$ = nl_create_minus_expression($2);
     }
+    | IDENTIFIER LP RP
+    {
+        $$ = nl_create_function_call_expression($1);
+    }
     | LP expression RP
     {
         $$ = $2;
@@ -99,6 +127,16 @@ primary_expression
     }
     | INT_LITERAL
     | DOUBLE_LITERAL
+    ;
+block
+    : LC statement_list RC
+    {
+        $$ = nl_create_block($2);
+    }
+    | LC RC
+    {
+        $$ = nl_create_block(NULL);
+    }
     ;
 %%
 int yyerror(char const *str) {

@@ -19,7 +19,7 @@ convert_value_to_expression(NL_Value *v) {
     if (v->type == INT_VALUE) {
         exp->type = INT_EXPRESSION;
         exp->u.int_value = v->u.int_value;
-    } else if (v->type == DOUBLE_VAULE) {
+    } else if (v->type == DOUBLE_VALUE) {
         exp->type = DOUBLE_EXPRESSION;
         exp->u.double_value = v->u.double_value;
     } else {
@@ -72,6 +72,13 @@ nl_create_minus_expression(Expression *exp) {
     return result;
 }
 
+Expression *
+nl_create_function_call_expression(char *identifier) {
+    Expression *result = nl_alloc_expression(FUNCTION_CALL_EXPRESSION);
+    result->u.identifier = identifier;
+    return result;
+}
+
 char *
 nl_create_identifier(char *str) {
     char *new_str;
@@ -109,6 +116,21 @@ nl_create_print_statement(Expression *expression) {
     return statement;
 }
 
+Statement *
+nl_create_function_definition_statement(char *identifier, Block *block) {
+    Statement *statement = malloc_statement(FUNCTION_DEFINITION_STATEMENT);
+    statement->u.functionDefinition.identifier = identifier;
+    statement->u.functionDefinition.block = block;
+    return statement;
+}
+
+Statement *
+nl_create_return_statement(Expression *expression) {
+    Statement *statement = malloc_statement(RETURN_STATEMENT);
+    statement->u.expression = expression;
+    return statement;
+}
+
 StatementList *
 nl_create_statement_list(Statement *statement) {
     StatementList *statement_list = malloc(sizeof(StatementList));
@@ -129,4 +151,11 @@ nl_add_to_statement_list(StatementList *list, Statement *statement) {
     now->next = nl_create_statement_list(statement);
 
     return list;
+}
+
+Block *
+nl_create_block(StatementList *statement_list) {
+    Block *block = malloc(sizeof(Block));
+    block->statement_list = statement_list;
+    return block;
 }
