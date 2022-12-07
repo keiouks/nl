@@ -18,16 +18,39 @@ nl_execute_assign_statement(Statement *statement) {
     Expression *exp = statement->u.assign.expression;
     char *identifier = statement->u.assign.identifier;
 
+    var = nl_search_global_variable(king, identifier);
+    if (var == NULL) {
+        printf("[runtime error] assignment with not existed variable [%s].\n", identifier);
+        exit(1);
+    }
+
     sValue.type = NORMAL_STATEMENT_VALUE;
 
     val = nl_eval_expression(exp);
-    var = nl_search_global_variable(king, identifier);
 
-    if(var != NULL) {
-        var->value = val;
-    } else {
-        nl_add_global_variable(king, identifier, &val);
+    var->value = val;
+    return sValue;
+}
+
+StatementValue
+nl_execute_declaration_statement(Statement *statement) {
+    StatementValue sValue;
+    NL_Value val;
+    Variable *var;
+    King *king = nl_get_current_king();
+    Expression *exp = statement->u.declaration.expression;
+    char *identifier = statement->u.declaration.identifier;
+
+    var = nl_search_global_variable(king, identifier);
+    if (var != NULL) {
+        printf("[runtime error] declaring variable [%s] already existed.\n", identifier);
+        exit(1);
     }
+
+    sValue.type = NORMAL_STATEMENT_VALUE;
+
+    val = nl_eval_expression(exp);
+    nl_add_global_variable(king, identifier, &val);
     return sValue;
 }
 
@@ -87,6 +110,10 @@ nl_execute_statement(Statement *statement) {
         }
         case ASSIGN_STATEMENT: {
             sValue = nl_execute_assign_statement(statement);
+            break;
+        }
+        case DECLARATION_STATEMENT: {
+            sValue = nl_execute_declaration_statement(statement);
             break;
         }
         case PRINT_STATEMENT: {

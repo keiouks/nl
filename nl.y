@@ -12,11 +12,11 @@ int yyerror(char const *str);
     StatementList *statement_list;
     Block *block;
 }
-%token SEMICOLON ADD SUB MUL DIV LP RP MOD ASSIGN PRINT FUNCTION LC RC RETURN
+%token SEMICOLON ADD SUB MUL DIV LP RP MOD ASSIGN PRINT FUNCTION LC RC RETURN LET
 %token <identifier> IDENTIFIER
 %token <expression> INT_LITERAL DOUBLE_LITERAL
 %type <expression> primary_expression mult_expression add_expression expression
-%type <statement> statement expression_statement assign_statement print_statement function_definition_statement return_statement
+%type <statement> statement expression_statement assign_statement print_statement function_definition_statement return_statement declaration_statement
 %type <statement_list> statement_list
 %type <block> block
 %%
@@ -44,6 +44,7 @@ statement
     | print_statement
     | function_definition_statement
     | return_statement
+    | declaration_statement
     ;
 expression_statement
     : expression SEMICOLON
@@ -55,6 +56,12 @@ assign_statement
     : IDENTIFIER ASSIGN expression SEMICOLON
     {
         $$ = nl_create_assign_statement($1, $3);
+    }
+    ;
+declaration_statement
+    : LET IDENTIFIER ASSIGN expression SEMICOLON
+    {
+        $$ = nl_create_declaration_statement($2, $4);
     }
     ;
 print_statement

@@ -110,6 +110,14 @@ nl_create_assign_statement(char *identifier, Expression *expression) {
 }
 
 Statement *
+nl_create_declaration_statement(char *identifier, Expression *expression) {
+    Statement *statement = malloc_statement(DECLARATION_STATEMENT);
+    statement->u.declaration.identifier = identifier;
+    statement->u.declaration.expression = expression;
+    return statement;
+}
+
+Statement *
 nl_create_print_statement(Expression *expression) {
     Statement *statement = malloc_statement(PRINT_STATEMENT);
     statement->u.expression = expression;

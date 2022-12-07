@@ -8,6 +8,7 @@ int yywrap(void) {
 }
 %}
 %%
+"let" return LET;
 "print" return PRINT;
 "function" return FUNCTION;
 "return" return RETURN;

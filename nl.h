@@ -59,6 +59,11 @@ typedef struct {
     Expression *expression;
 } AssignStatement;
 
+typedef struct {
+    char *identifier;
+    Expression *expression;
+} DeclarationStatement;
+
 typedef struct Block_tag Block;
 
 typedef struct {
@@ -72,6 +77,7 @@ typedef enum {
     PRINT_STATEMENT,
     FUNCTION_DEFINITION_STATEMENT,
     RETURN_STATEMENT,
+    DECLARATION_STATEMENT,
     STATEMENT_TYPE_PLUS
 } StatementType;
 
@@ -80,6 +86,7 @@ typedef struct {
     union {
         Expression *expression;
         AssignStatement assign;
+        DeclarationStatement declaration;
         FunctionDefinitionStatement functionDefinition;
     } u;
 } Statement;
@@ -132,6 +139,7 @@ StatementList *nl_add_to_statement_list(StatementList *list, Statement *statemen
 Block *nl_create_block(StatementList *statement_list);
 Statement *nl_create_function_definition_statement(char *identifier, Block *block);
 Statement *nl_create_return_statement(Expression *expression);
+Statement *nl_create_declaration_statement(char *identifier, Expression *expression);
 
 /* eval.c */
 NL_Value nl_eval_binary_expression(ExpressionType type, Expression *left, Expression *right);
