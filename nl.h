@@ -118,10 +118,15 @@ typedef struct {
     NL_Value return_value;
 } StatementValue;
 
-struct King_tag {
+typedef struct Scope_tag {
     Variable *variable;
-    StatementList *statement_list;
     FunctionDefinition *function_list;
+    struct Scope_tag *upper;
+} Scope;
+
+struct King_tag {
+    StatementList *statement_list;
+    Scope *scope;
 };
 
 /* create.c */

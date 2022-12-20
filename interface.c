@@ -18,9 +18,12 @@ nl_get_current_king(void) {
 King *
 NL_create_king(void) {
     King *king = malloc(sizeof(struct King_tag));
-    king->variable = NULL;
+    Scope *scope = malloc(sizeof(Scope));
+    scope->function_list = NULL;
+    scope->variable = NULL;
+    scope->upper = NULL;
     king->statement_list = NULL;
-    king->function_list = NULL;
+    king->scope = scope;
 
     return king;
 }
@@ -42,7 +45,7 @@ NL_compile(King *king, FILE *fp) {
 Variable *
 nl_search_global_variable(King *king, char *identifier) {
     Variable *result;
-    for(result = king->variable; result; result = result->next) {
+    for(result = king->scope->variable; result; result = result->next) {
         if(!strcmp(result->name, identifier)) {
             return result;
         }
@@ -55,8 +58,8 @@ nl_add_global_variable(King *king, char *identifier, NL_Value *value) {
     Variable *new_var = malloc(sizeof(Variable));
     new_var->name = malloc(strlen(identifier) + 1);
     strcpy(new_var->name, identifier);
-    new_var->next = king->variable;
-    king->variable = new_var;
+    new_var->next = king->scope->variable;
+    king->scope->variable = new_var;
     new_var->value = *value;
 }
 
@@ -64,7 +67,7 @@ FunctionDefinition *
 nl_search_function(char *name) {
     FunctionDefinition *pos;
     King *king = nl_get_current_king();
-    for (pos = king->function_list; pos; pos = pos->next) {
+    for (pos = king->scope->function_list; pos; pos = pos->next) {
         if (!strcmp(pos->name, name)) {
             break;
         }

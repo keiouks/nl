@@ -82,8 +82,8 @@ nl_execute_function_definition_statement(Statement *statement) {
     newFun = malloc(sizeof(FunctionDefinition));
     newFun->block = block;
     newFun->name = identifier;
-    newFun->next = king->function_list;
-    king->function_list = newFun;
+    newFun->next = king->scope->function_list;
+    king->scope->function_list = newFun;
 
     return sValue;
 }
