@@ -18,9 +18,12 @@ nl_get_current_king(void) {
 King *
 NL_create_king(void) {
     King *king = malloc(sizeof(struct King_tag));
-    king->variable = NULL;
+    Scope *scope = malloc(sizeof(Scope));
+    scope->function_list = NULL;
+    scope->variable = NULL;
+    scope->upper = NULL;
     king->statement_list = NULL;
-    king->function_list = NULL;
+    king->scope = scope;
 
     return king;
 }
@@ -40,39 +43,58 @@ NL_compile(King *king, FILE *fp) {
 }
 
 Variable *
-nl_search_global_variable(King *king, char *identifier) {
+nl_search_variable(Scope *scope, char *identifier) {
+    Scope *currentScope;
     Variable *result;
-    for(result = king->variable; result; result = result->next) {
-        if(!strcmp(result->name, identifier)) {
-            return result;
+    for (currentScope = scope; currentScope; currentScope = currentScope->upper) {
+        for(result = currentScope->variable; result; result = result->next) {
+            if(!strcmp(result->name, identifier)) {
+                return result;
+            }
         }
     }
     return NULL;
 }
 
 void
-nl_add_global_variable(King *king, char *identifier, NL_Value *value) {
-    Variable *new_var = malloc(sizeof(Variable));
+nl_add_variable(Scope *scope, char *identifier, NL_Value *value) {
+    /* 先找 */
+    Variable *new_var = NULL;
+    Variable *temp = NULL;
+    for(temp = scope->variable; temp; temp = temp->next) {
+        if(!strcmp(temp->name, identifier)) {
+            new_var = temp;
+            break;
+        }
+    }
+    /* 能找到， 重复声明 */
+    if(new_var != NULL) {
+        printf("[runtime error] declaring variable [%s] already existed.\n", identifier);
+        exit(1);
+    }
+    new_var = malloc(sizeof(Variable));
     new_var->name = malloc(strlen(identifier) + 1);
     strcpy(new_var->name, identifier);
-    new_var->next = king->variable;
-    king->variable = new_var;
+    new_var->next = scope->variable;
+    scope->variable = new_var;
     new_var->value = *value;
 }
 
 FunctionDefinition *
-nl_search_function(char *name) {
+nl_search_function(Scope *scope, char *name) {
     FunctionDefinition *pos;
-    King *king = nl_get_current_king();
-    for (pos = king->function_list; pos; pos = pos->next) {
-        if (!strcmp(pos->name, name)) {
-            break;
+    Scope *currentScope;
+    for (currentScope = scope; currentScope; currentScope = currentScope->upper) {
+        for (pos = currentScope->function_list; pos; pos = pos->next) {
+            if (!strcmp(pos->name, name)) {
+                return pos;
+            }
         }
     }
-    return pos;
+    return NULL;
 }
 
 void
 NL_run(King *king) {
-    nl_execute_statement_list(king->statement_list);
+    nl_execute_statement_list(king->statement_list, king->scope);
 }

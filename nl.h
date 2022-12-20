@@ -100,10 +100,11 @@ struct Block_tag {
     StatementList *statement_list;
 };
 
-
+typedef struct Scope_tag Scope;
 typedef struct FunctionDefinition_tag {
     char *name;
     Block *block;
+    Scope *scope;
     struct FunctionDefinition_tag *next;
 } FunctionDefinition;
 
@@ -118,10 +119,15 @@ typedef struct {
     NL_Value return_value;
 } StatementValue;
 
-struct King_tag {
+struct Scope_tag {
     Variable *variable;
-    StatementList *statement_list;
     FunctionDefinition *function_list;
+    struct Scope_tag *upper;
+};
+
+struct King_tag {
+    StatementList *statement_list;
+    Scope *scope;
 };
 
 /* create.c */
@@ -142,18 +148,18 @@ Statement *nl_create_return_statement(Expression *expression);
 Statement *nl_create_declaration_statement(char *identifier, Expression *expression);
 
 /* eval.c */
-NL_Value nl_eval_binary_expression(ExpressionType type, Expression *left, Expression *right);
-NL_Value nl_eval_expression(Expression *exp);
+NL_Value nl_eval_binary_expression(ExpressionType type, Expression *left, Expression *right, Scope *scope);
+NL_Value nl_eval_expression(Expression *exp, Scope *scope);
 void nl_print_value(NL_Value *v);
 
 /* interface.c */
 King *nl_get_current_king(void);
-Variable *nl_search_global_variable(King *king, char *identifier);
-void nl_add_global_variable(King *king, char *identifier, NL_Value *value);
-FunctionDefinition *nl_search_function(char *name);
+Variable *nl_search_variable(Scope *scope, char *identifier);
+void nl_add_variable(Scope *scope, char *identifier, NL_Value *value);
+FunctionDefinition *nl_search_function(Scope *scope, char *name);
 
 /* execute.c */
-StatementValue nl_execute_assign_statement(Statement *statement);
-StatementValue nl_execute_statement_list(StatementList *list);
+StatementValue nl_execute_assign_statement(Statement *statement, Scope *scope);
+StatementValue nl_execute_statement_list(StatementList *list, Scope *scope);
 
 #endif /* PRIVATE_NL_H */

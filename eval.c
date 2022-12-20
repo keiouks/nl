@@ -20,9 +20,8 @@ eval_double_expression(double value) {
 }
 
 static NL_Value
-eval_variable_expression(Expression *exp) {
-    King *king = nl_get_current_king();
-    Variable *var = nl_search_global_variable(king, exp->u.identifier);
+eval_variable_expression(Expression *exp, Scope *scope) {
+    Variable *var = nl_search_variable(scope, exp->u.identifier);
     if (var != NULL) {
         return var->value;
     } else {
@@ -31,11 +30,11 @@ eval_variable_expression(Expression *exp) {
     }
 }
 
-static NL_Value eval_expression(Expression *exp);
+static NL_Value eval_expression(Expression *exp, Scope *scope);
 
 static NL_Value
-eval_minus_expression(Expression *exp) {
-    NL_Value result = eval_expression(exp->u.minus_expression);
+eval_minus_expression(Expression *exp, Scope *scope) {
+    NL_Value result = eval_expression(exp->u.minus_expression, scope);
     if (result.type == INT_VALUE) {
         result.u.int_value = -result.u.int_value;
     } else if (result.type == DOUBLE_VALUE) {
@@ -48,16 +47,23 @@ eval_minus_expression(Expression *exp) {
 }
 
 static NL_Value
-eval_function_call_expression(Expression *exp) {
+eval_function_call_expression(Expression *exp, Scope *scope) {
     NL_Value result;
     StatementValue sValue;
+    Scope *fun_scope;
     char *fun_name = exp->u.identifier;
-    FunctionDefinition *fun_def = nl_search_function(fun_name);
+    FunctionDefinition *fun_def = nl_search_function(scope, fun_name);
     if (!fun_def) {
         printf("[runtime error] eval function call expression, function [%s] is not define.\n", fun_name);
         exit(1);
     }
-    sValue = nl_execute_statement_list(fun_def->block->statement_list);
+    /* 调用函数需要新的作用域 */
+    fun_scope = malloc(sizeof(Scope));
+    fun_scope->function_list = NULL;
+    fun_scope->variable = NULL;
+    /* 函数作用域的上层不是调用位置的作用域，而是定义时的作用域 */
+    fun_scope->upper = fun_def->scope;
+    sValue = nl_execute_statement_list(fun_def->block->statement_list, fun_scope);
     if (sValue.type == RETURN_STATEMENT_VALUE) {
         result = sValue.return_value;
     } else {
@@ -67,7 +73,7 @@ eval_function_call_expression(Expression *exp) {
 }
 
 static NL_Value
-eval_expression(Expression *exp) {
+eval_expression(Expression *exp, Scope *scope) {
     NL_Value v;
     if (!exp) {
         v.type = NULL_VALUE;
@@ -83,11 +89,11 @@ eval_expression(Expression *exp) {
             break;
         }
         case VARIABLE_EXPRESSION: {
-            v = eval_variable_expression(exp);
+            v = eval_variable_expression(exp, scope);
             break;
         }
         case MINUS_EXPRESSION: {
-            v = eval_minus_expression(exp);
+            v = eval_minus_expression(exp, scope);
             break;
         }
         case ADD_EXPRESSION:
@@ -95,11 +101,11 @@ eval_expression(Expression *exp) {
         case MUL_EXPRESSION:
         case DIV_EXPRESSION:
         case MOD_EXPRESSION: {
-            v = nl_eval_binary_expression(exp->type, exp->u.binary_expression.left, exp->u.binary_expression.right);
+            v = nl_eval_binary_expression(exp->type, exp->u.binary_expression.left, exp->u.binary_expression.right, scope);
             break;
         }
         case FUNCTION_CALL_EXPRESSION: {
-            v = eval_function_call_expression(exp);
+            v = eval_function_call_expression(exp, scope);
             break;
         }
         case EXPRESSION_TYPE_PLUS:
@@ -188,12 +194,12 @@ eval_binary_double(ExpressionType operator, double left, double right, NL_Value 
 }
 
 NL_Value
-nl_eval_binary_expression(ExpressionType type, Expression *left, Expression *right) {
+nl_eval_binary_expression(ExpressionType type, Expression *left, Expression *right, Scope *scope) {
     NL_Value left_val;
     NL_Value right_val;
     NL_Value result;
-    left_val = eval_expression(left);
-    right_val = eval_expression(right);
+    left_val = eval_expression(left, scope);
+    right_val = eval_expression(right, scope);
 
     if (left_val.type == INT_VALUE && right_val.type == INT_VALUE) {
         eval_binary_int(type, left_val.u.int_value, right_val.u.int_value, &result);
@@ -214,8 +220,8 @@ nl_eval_binary_expression(ExpressionType type, Expression *left, Expression *rig
 }
 
 NL_Value
-nl_eval_expression(Expression *exp) {
-    return eval_expression(exp);
+nl_eval_expression(Expression *exp, Scope *scope) {
+    return eval_expression(exp, scope);
 }
 
 void
