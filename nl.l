@@ -6,6 +6,10 @@
 int yywrap(void) {
     return 1;
 }
+
+void increace_line_number(void) {
+    nl_get_current_king()->line_number++;
+}
 %}
 %%
 "let" return LET;
@@ -39,9 +43,10 @@ int yywrap(void) {
     yylval.expression = expression;
     return DOUBLE_LITERAL;
 }
-[ \t\n] ;
+[ \t] ;
+"\n" {increace_line_number();};
 . {
-    printf("lexical error with unexpected charactor %s\n", yytext);
+    printf("lexical error with unexpected charactor %s, in line [%d]\n", yytext, nl_get_current_king()->line_number);
     exit(1);
 }
 %%

@@ -8,7 +8,7 @@ nl_alloc_expression(ExpressionType type) {
     Expression *exp;
     exp = malloc(sizeof(Expression));
     exp->type = type;
-
+    exp->line_number = nl_get_current_king()->line_number;
     return exp;
 }
 
@@ -65,6 +65,7 @@ Statement *
 malloc_statement(StatementType type) {
     Statement *statement = malloc(sizeof(Statement));
     statement->type = type;
+    statement->line_number = nl_get_current_king()->line_number;
     return statement;
 }
 

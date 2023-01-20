@@ -24,7 +24,7 @@ NL_create_king(void) {
     scope->upper = NULL;
     king->statement_list = NULL;
     king->scope = scope;
-
+    king->line_number = 1;
     return king;
 }
 
@@ -69,7 +69,7 @@ nl_add_variable(Scope *scope, char *identifier, NL_Value *value) {
     }
     /* 能找到， 重复声明 */
     if(new_var != NULL) {
-        printf("[runtime error] declaring variable [%s] already existed.\n", identifier);
+        printf("[runtime error] declaring variable [%s] in line [%d] already existed.\n", identifier, nl_get_current_king()->line_number);
         exit(1);
     }
     new_var = malloc(sizeof(Variable));

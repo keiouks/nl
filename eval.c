@@ -25,7 +25,7 @@ eval_variable_expression(Expression *exp, Scope *scope) {
     if (var != NULL) {
         return var->value;
     } else {
-        printf("[runtime error] This variable[%s] has not been declared.\n", exp->u.identifier);
+        printf("[runtime error] variable[%s] has not been declared in line [%d].\n", exp->u.identifier, exp->line_number);
         exit(1);
     }
 }
@@ -40,7 +40,7 @@ eval_minus_expression(Expression *exp, Scope *scope) {
     } else if (result.type == DOUBLE_VALUE) {
         result.u.double_value = -result.u.double_value;
     } else {
-        printf("[runtime error] eval minus expression with unexpected value type: %d.\n", result.type);
+        printf("[runtime error] eval minus expression with unexpected value type: %d in line [%d].\n", result.type, exp->line_number);
         exit(1);
     }
     return result;
@@ -54,7 +54,7 @@ eval_function_call_expression(Expression *exp, Scope *scope) {
     char *fun_name = exp->u.identifier;
     FunctionDefinition *fun_def = nl_search_function(scope, fun_name);
     if (!fun_def) {
-        printf("[runtime error] eval function call expression, function [%s] is not define.\n", fun_name);
+        printf("[runtime error] eval function call expression, function [%s] is not define in line [%d].\n", fun_name, exp->line_number);
         exit(1);
     }
     /* 调用函数需要新的作用域 */
@@ -110,7 +110,7 @@ eval_expression(Expression *exp, Scope *scope) {
         }
         case EXPRESSION_TYPE_PLUS:
         default: {
-            printf("[runtime error] eval expression with unexpected type:%d\n", exp->type);
+            printf("[runtime error] eval expression with unexpected type:%d in line [%d].\n", exp->type, exp->line_number);
             exit(1);
         }
     }
@@ -212,7 +212,7 @@ nl_eval_binary_expression(ExpressionType type, Expression *left, Expression *rig
         right_val.u.double_value = right_val.u.int_value;
         eval_binary_double(type, left_val.u.double_value, right_val.u.double_value, &result);
     } else {
-        printf("[runtime error] eval binary expression with unexpected type, left:%d, right:%d\n", left_val.type, right_val.type);
+        printf("[runtime error] eval binary expression with unexpected type, left:%d in line [%d], right:%d in line [%d]\n", left_val.type, left->line_number, right_val.type, right->line_number);
         exit(1);
     }
 

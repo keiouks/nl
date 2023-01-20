@@ -21,7 +21,7 @@ nl_execute_assign_statement(Statement *statement, Scope *scope) {
     /* 找到变量 */
     var = nl_search_variable(scope, identifier);
     if (var == NULL) {
-        printf("[runtime error] assign to not exist variable [%s].\n", identifier);
+        printf("[runtime error] assign to not exist variable [%s] in line [%d].\n", identifier, statement->line_number);
         exit(1);
     }
 
@@ -74,7 +74,7 @@ nl_execute_function_definition_statement(Statement *statement, Scope *scope) {
     sValue.type = NORMAL_STATEMENT_VALUE;
     /* 已有同名函数 */
     if (newFun != NULL) {
-        printf("[runtime error] execute function definition statement while function [%s] is exist.\n", identifier);
+        printf("[runtime error] execute function definition statement while function [%s] is exist in line [%d].\n", identifier, statement->line_number);
         exit(1);
     }
     newFun = malloc(sizeof(FunctionDefinition));
@@ -129,7 +129,7 @@ nl_execute_statement(Statement *statement, Scope *scope) {
         }
         case STATEMENT_TYPE_PLUS:
         default: {
-            printf("[runtime error] execute statement with unexpected type [%d].\n", statement->type);
+            printf("[runtime error] execute statement with unexpected type [%d] in line [%d].\n", statement->type, statement->line_number);
             exit(1);
         }
     }

@@ -45,6 +45,7 @@ typedef struct {
 
 struct Expression_tag {
     ExpressionType type;
+    int line_number;
     union {
         int int_value;
         double double_value;
@@ -83,6 +84,7 @@ typedef enum {
 
 typedef struct {
     StatementType type;
+    int line_number;
     union {
         Expression *expression;
         AssignStatement assign;
@@ -128,6 +130,7 @@ struct Scope_tag {
 struct King_tag {
     StatementList *statement_list;
     Scope *scope;
+    int line_number;
 };
 
 /* create.c */

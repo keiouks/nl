@@ -148,6 +148,6 @@ block
 %%
 int yyerror(char const *str) {
     extern char *yytext;
-    fprintf(stderr, "parse error near %s\n", yytext);
+    fprintf(stderr, "parse error in line [%d] near %s\n", nl_get_current_king()->line_number, yytext);
     return 0;
 }
